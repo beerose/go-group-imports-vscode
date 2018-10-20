@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "out",
+    "lib": ["es6"],
+    "sourceMap": true,
+    "rootDir": "src"
+  },
+  "exclude": ["node_modules", ".vscode-test"],
+  "outDir": "../out/",
+  "allowJs": true,
+  "checkJs": true,
+  "declaration": false,
+  "forceConsistentCasingInFileNames": true,
+  "importHelpers": true,
+  "noEmitHelpers": true,
+  "noFallthroughCasesInSwitch": true,
+  "noImplicitAny": true,
+  "noImplicitReturns": true,
+  "noImplicitThis": true,
+  "noUnusedLocals": true,
+  "strictNullChecks": true,
+  "pretty": true,
+  "removeComments": true,
+  "sourceMap": true,
+  "types": ["node_modules/@types", "src/declarations.d.ts"]
+}
