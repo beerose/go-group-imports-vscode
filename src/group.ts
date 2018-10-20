@@ -3,6 +3,7 @@ import {
   window,
 } from 'vscode';
 import { multilineImportsGroupRegex, resolveRootPackage, getImportsRange } from './utils';
+import { groupImportsOnSave } from './groupOnSave';
 
 export const goGroupImports = () => {
   const { activeTextEditor: editor, activeTextEditor: { document } } = window;
@@ -68,6 +69,8 @@ const group = (imports: string[], rootPkg: string): string => {
     }
   });
 
-  return `${importGroups.stdlib.join('\n')}\n\n${
-    importGroups.thirdParty.join('\n')}\n\n${importGroups.own.join('\n')}`;
+  return Object.keys(importGroups)
+    .filter(key => importGroups[key].length)
+    .map(key => importGroups[key].join('\n'))
+    .join('\n\n');
 };
