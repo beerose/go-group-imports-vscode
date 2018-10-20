@@ -61,9 +61,7 @@
   },
   "homepage": "https://github.com/blackdahila/go-group-imports-vscode/blob/master/README.md",
   "dependencies": {
-    "@types/chai": "^4.1.6",
     "@types/mocha": "^5.2.5",
-    "chai": "^4.2.0",
     "mocha": "^5.2.0"
   }
 }
