@@ -13,7 +13,7 @@ const isOwnImport = (imp: string, root: string): boolean => {
   return imp.includes(root);
 };
 
-export const sort = (imports: string[], rootPkg: string): string => {
+export const group = (imports: string[], rootPkg: string): string => {
   const importGroups = <ImportGroups>{
     stdlib: [],
     thirdParty: [],

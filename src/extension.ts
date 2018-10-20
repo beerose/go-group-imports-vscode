@@ -5,10 +5,10 @@ import {
   Range,
   window,
 } from 'vscode';
-import { sort } from './sort';
+import { group } from './group';
 import { multilineImportsGroupRegex, resolveRootPackage, getImportsRange } from './utils';
 
-const goSortImports = () => {
+const goGroupImports = () => {
   const { activeTextEditor: editor, activeTextEditor: { document } } = window;
   const documentText = document.getText();
 
@@ -28,13 +28,13 @@ const goSortImports = () => {
     .split("\n")
     .filter(line => line != "");
 
-  const sorted = sort(imports, rootPkg);
+  const grouped = group(imports, rootPkg);
 
   const importsRange = getImportsRange(documentText);
   editor.edit(edit => {
     edit.replace(
         new Range(importsRange.start, 0, importsRange.end - 1, Number.MAX_VALUE),
-        sorted)
+        grouped)
   });
 
   document.save();
@@ -43,7 +43,7 @@ const goSortImports = () => {
 };
 
 export function activate(context: ExtensionContext) {
-  let disposable = commands.registerCommand('extension.goSortImports', goSortImports);
+  let disposable = commands.registerCommand('extension.goGroupImports', goGroupImports);
 
   context.subscriptions.push(disposable);
 }
