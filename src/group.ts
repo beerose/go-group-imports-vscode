@@ -2,36 +2,27 @@ import {
   Range,
   window,
 } from 'vscode';
-import { multilineImportsGroupRegex, resolveRootPackage, getImportsRange } from './utils';
+import { multilineImportsGroupRegex, resolveRootPackage, getImportsRange, getImports } from './utils';
 
 export const goGroupImports = () => {
   const { activeTextEditor: editor, activeTextEditor: { document } } = window;
   const documentText = document.getText();
 
-  if (document.languageId !== 'go') {
-    window.showWarningMessage('Not a go file.');
-    return;
-  }
+  if (document.languageId !== 'go') return;
 
   const rootPkg = resolveRootPackage();
   if (rootPkg === '') return;
 
-  const importsMatch = documentText.match(multilineImportsGroupRegex);
-  if (importsMatch.length < 2) {
-    window.showErrorMessage('Cannot extract imports from file.');
-    return;
-  }
-  const imports = importsMatch[1]
-    .split("\n")
-    .filter(line => line != "");
+  const imports = getImports(documentText);
+  if (!imports.length) return;
 
-  const grouped = group(imports, rootPkg);
+  const groupedList = group(imports, rootPkg);
 
   const importsRange = getImportsRange(documentText);
   editor.edit(edit => {
     edit.replace(
         new Range(importsRange.start, 0, importsRange.end - 1, Number.MAX_VALUE),
-        grouped)
+        importGroupsToString(groupedList))
   });
 
   document.save();
@@ -51,7 +42,7 @@ const isOwnImport = (imp: string, root: string): boolean => {
   return imp.includes(root);
 };
 
-const group = (imports: string[], rootPkg: string): string => {
+export const group = (imports: string[], rootPkg: string): ImportGroups => {
   const importGroups = <ImportGroups>{
     stdlib: [],
     thirdParty: [],
@@ -68,8 +59,12 @@ const group = (imports: string[], rootPkg: string): string => {
     }
   });
 
-  return Object.keys(importGroups)
+  return importGroups;
+};
+
+const importGroupsToString = (importGroups: ImportGroups): string =>
+  Object.keys(importGroups)
     .filter(key => importGroups[key].length)
     .map(key => importGroups[key].join('\n'))
     .join('\n\n');
-};
+

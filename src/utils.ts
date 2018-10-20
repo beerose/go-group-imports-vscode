@@ -25,18 +25,14 @@ export const resolveRootPackage = () => {
 };
 
 export const getImports = (documentText: string): string[] => {
-  const importsGroup = documentText.match(multilineImportsGroupRegex);
-
-  if (importsGroup.length < 2) {
-    window.showErrorMessage('Cannot extract imports from file.');
-    return;
+  const importsMatch = documentText.match(multilineImportsGroupRegex);
+  if (!importsMatch || importsMatch.length < 2) {
+    return [];
   }
 
-  const imports = importsGroup[1]
+  return importsMatch[1]
     .split("\n")
-    .filter(line => line != "");
-
-  return imports;
+    .filter(line => line.trim() != "");
 };
 
 export type ImportsRange = {
