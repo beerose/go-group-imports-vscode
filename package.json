@@ -11,6 +11,7 @@
     "Other"
   ],
   "activationEvents": [
+    "onLanguage:go",
     "onCommand:extension.goGroupImports"
   ],
   "main": "./out/extension",
