@@ -3,7 +3,6 @@ import {
   window,
 } from 'vscode';
 import { multilineImportsGroupRegex, resolveRootPackage, getImportsRange } from './utils';
-import { groupImportsOnSave } from './groupOnSave';
 
 export const goGroupImports = () => {
   const { activeTextEditor: editor, activeTextEditor: { document } } = window;

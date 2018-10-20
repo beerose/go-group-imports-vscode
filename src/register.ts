@@ -4,7 +4,7 @@ import { groupImportsOnSave } from './groupOnSave';
 
 let saveRegistration : Disposable;
 
-export function unregisterWillSaveTextDocument() {
+const unregisterWillSaveTextDocument = () => {
   if (!saveRegistration) {
     return;
   }
@@ -13,7 +13,7 @@ export function unregisterWillSaveTextDocument() {
   saveRegistration = null;
 }
 
-export function registerWillSaveTextDocument() {
+const registerWillSaveTextDocument = () => {
   if (saveRegistration) {
     return;
   }
@@ -21,14 +21,10 @@ export function registerWillSaveTextDocument() {
   saveRegistration = workspace.onWillSaveTextDocument(groupImportsOnSave);
 }
 
-export function getOnSaveSetting() {
-  return workspace.getConfiguration('groupImports').get('onSave');
-}
-
-export function updateSaveRegistration() {
-    if (getOnSaveSetting()) {
-        registerWillSaveTextDocument();
-    } else {
-        unregisterWillSaveTextDocument();
+export const getOnSaveSetting =
+    () => {
+      return workspace.getConfiguration('groupImports').get('onSave');
     }
-}
+
+export const updateSaveRegistration = () =>
+  getOnSaveSetting() ? registerWillSaveTextDocument() : unregisterWillSaveTextDocument();
