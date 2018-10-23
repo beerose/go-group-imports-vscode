@@ -1,9 +1,9 @@
 # go-group-imports
 
-VSCode extension for separating imports in go files into three groups:
+VSCode extension for separating imports in Go files into three groups:
 1. Standard library imports,
 2. Third party imports,
-3. Own (ex. belonged to organization) imports.
+3. Own (belonging to the organization) imports.
 
 ## Extension Settings
 
