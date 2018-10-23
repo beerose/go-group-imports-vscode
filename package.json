@@ -2,7 +2,7 @@
   "name": "go-group-imports",
   "displayName": "Go Group Imports",
   "description": "VSCode extension for separating imports in go files into three groups: stdlib, 3rdparty, own.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "aleksandra",
   "icon": "assets/logo.png",
   "galleryBanner": {
@@ -31,15 +31,15 @@
         "command": "extension.goGroupImports",
         "title": "Group imports"
       }
-    ]
-  },
-  "configuration": {
-    "title": "Group Imports configuration",
-    "properties": {
-      "groupImports.onSave": {
-        "type": "boolean",
-        "default": true,
-        "description": "Automatically group imports on save."
+    ],
+    "configuration": {
+      "title": "Group Imports configuration",
+      "properties": {
+        "groupImports.onSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically group imports on save."
+        }
       }
     }
   },
