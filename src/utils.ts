@@ -13,7 +13,8 @@ export const resolveRootPackage = () => {
   }
 
   const pwd = window.activeTextEditor.document.fileName;
-  if (!pwd.includes(gopath)) {
+  const relative = path.relative(gopath, pwd);
+  if (!pwd.includes(relative)) {
     window.showErrorMessage('File is not in gopath.');
     return '';
   }
