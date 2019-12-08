@@ -2,7 +2,7 @@
   "name": "go-group-imports",
   "displayName": "Go Group Imports",
   "description": "VSCode extension for separating imports in go files into three groups: stdlib, 3rdparty, own.",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "publisher": "aleksandra",
   "icon": "assets/logo.png",
   "galleryBanner": {
@@ -57,9 +57,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/blackdahila/go-group-imports-vscode.git"
+    "url": "https://github.com/beerose/go-group-imports-vscode.git"
   },
-  "homepage": "https://github.com/blackdahila/go-group-imports-vscode/blob/master/README.md",
+  "homepage": "https://github.com/beerose/go-group-imports-vscode/blob/master/README.md",
   "dependencies": {
     "@types/mocha": "^5.2.5",
     "mocha": "^5.2.0"
