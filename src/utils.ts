@@ -1,28 +1,76 @@
 import * as path from 'path';
-import {
-  window,
-} from 'vscode';
+import { window, workspace, RelativePattern } from 'vscode';
+import { resolve } from 'path';
+const { readdir } = require('fs').promises;
 
 export const multilineImportsGroupRegex = /import \(([^)]+)\)/;
 
-export const resolveRootPackage = () => {
-  const gopath = process.env.GOPATH;
-  if (gopath === '') {
-    window.showErrorMessage('No gopath configured.');
-    return '';
+const fileInGOPATH = (gopath: string | undefined) => {
+  if (!gopath) {
+    return false;
   }
 
   const pwd = window.activeTextEditor.document.fileName;
   const relative = path.relative(gopath, pwd);
   if (!pwd.includes(relative)) {
-    window.showErrorMessage('File is not in gopath.');
-    return '';
+    false;
   }
 
-  const trimmedPwd = pwd.replace(path.join(gopath, 'src/', ''), '');
-  const rootPkg = trimmedPwd.split(path.sep).slice(0, 2).join(path.sep);
+  return true;
+};
+
+const resolveRootPackageWithGOPATH = () => {
+  const pwd = window.activeTextEditor.document.fileName;
+  const trimmedPwd = pwd.replace(path.join(process.env.GOPATH, 'src/', ''), '');
+  const rootPkg = trimmedPwd
+    .split(path.sep)
+    .slice(0, 2)
+    .join(path.sep);
 
   return rootPkg;
+};
+
+export const resolveRootPackage = () => {
+  if (fileInGOPATH(process.env.GOPATH)) {
+    return resolveRootPackageWithGOPATH();
+  }
+
+  const pwd = window.activeTextEditor.document.fileName;
+  const currentFolder = pwd
+    .split(path.sep)
+    .slice(0, -1)
+    .join(path.sep);
+
+  return getRootDir(currentFolder, 5).then(rootDir => {
+    return rootDir
+      .split(path.sep)
+      .slice(-1)
+      .join(path.sep);
+  });
+};
+
+const getRootDir = async (dir: string, depthLimit: number): Promise<string> => {
+  const dirents = (await readdir(dir, { withFileTypes: true })) as {
+    name: string;
+    isDirectory: () => boolean;
+  }[];
+  const goModFile = dirents.find(dirent => dirent.name === 'go.mod');
+  if (goModFile) {
+    return dir;
+  }
+
+  const newDir =
+    dir.split(path.sep).length > 1 &&
+    dir
+      .split(path.sep)
+      .slice(0, -1)
+      .join(path.sep);
+
+  if (depthLimit > 0 && newDir) {
+    return getRootDir(newDir, depthLimit - 1);
+  }
+
+  return '';
 };
 
 export const getImports = (documentText: string): string[] => {
@@ -31,15 +79,13 @@ export const getImports = (documentText: string): string[] => {
     return [];
   }
 
-  return importsMatch[1]
-    .split("\n")
-    .filter(line => line.trim() != "");
+  return importsMatch[1].split('\n').filter(line => line.trim() != '');
 };
 
 export type ImportsRange = {
-  start: number,
-  end: number,
-}
+  start: number;
+  end: number;
+};
 
 export const getImportsRange = (documentText: string): ImportsRange => {
   let start = 1; // lines in vs code are numereted from 1
@@ -61,5 +107,5 @@ export const getImportsRange = (documentText: string): ImportsRange => {
   return {
     end,
     start,
-  }
-}
+  };
+};
