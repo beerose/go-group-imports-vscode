@@ -27,10 +27,13 @@ export const goGroupImports = async () => {
 
   const importsRange = getImportsRange(documentText);
 
-  let edit = new WorkspaceEdit();
-  let startPos = new Position(importsRange.start, 0);
-  let endPos = new Position(importsRange.end - 1, Number.MAX_VALUE);
-  let range = new Range(startPos, endPos);
+  const edit = new WorkspaceEdit();
+  const range = new Range(
+    importsRange.start,
+    0,
+    importsRange.end - 1,
+    Number.MAX_VALUE
+  );
   edit.replace(document.uri, range, importGroupsToString(groupedList));
   workspace.applyEdit(edit).then(document.save);
 };
