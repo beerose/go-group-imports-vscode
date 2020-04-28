@@ -1,10 +1,5 @@
-import { Range, window } from 'vscode';
-import {
-  multilineImportsGroupRegex,
-  resolveRootPackage,
-  getImportsRange,
-  getImports,
-} from './utils';
+import { Range, window, workspace, WorkspaceEdit, Position } from 'vscode';
+import { resolveRootPackage, getImportsRange, getImports } from './utils';
 
 export const goGroupImports = async () => {
   const {
@@ -18,7 +13,7 @@ export const goGroupImports = async () => {
   const rootPkg = await resolveRootPackage();
   if (rootPkg === '') {
     window.showErrorMessage(
-      'Failed to resolve root project directory. No GOPATH variable or go.mod file found.',
+      'Failed to resolve root project directory. No GOPATH variable or go.mod file found.'
     );
     return;
   }
@@ -31,14 +26,13 @@ export const goGroupImports = async () => {
   const groupedList = group(imports, rootPkg);
 
   const importsRange = getImportsRange(documentText);
-  editor.edit(edit => {
-    edit.replace(
-      new Range(importsRange.start, 0, importsRange.end - 1, Number.MAX_VALUE),
-      importGroupsToString(groupedList),
-    );
-  });
 
-  document.save();
+  let edit = new WorkspaceEdit();
+  let startPos = new Position(importsRange.start, 0);
+  let endPos = new Position(importsRange.end - 1, Number.MAX_VALUE);
+  let range = new Range(startPos, endPos);
+  edit.replace(document.uri, range, importGroupsToString(groupedList));
+  workspace.applyEdit(edit).then(document.save);
 };
 
 type ImportGroups = {
@@ -62,7 +56,7 @@ export const group = (imports: string[], rootPkg: string): ImportGroups => {
     own: [],
   };
 
-  imports.forEach(imp => {
+  imports.forEach((imp) => {
     if (isOwnImport(imp, rootPkg)) {
       importGroups.own.push(imp);
     } else if (isStdlibImport(imp)) {
@@ -77,6 +71,6 @@ export const group = (imports: string[], rootPkg: string): ImportGroups => {
 
 const importGroupsToString = (importGroups: ImportGroups): string =>
   Object.keys(importGroups)
-    .filter(key => importGroups[key].length)
-    .map(key => importGroups[key].join('\n'))
+    .filter((key) => importGroups[key].length)
+    .map((key) => importGroups[key].join('\n'))
     .join('\n\n');

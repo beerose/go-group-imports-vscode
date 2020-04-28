@@ -1,14 +1,13 @@
 'use strict';
-import {
-  commands,
-  ExtensionContext,
-  workspace,
-} from 'vscode';
+import { commands, ExtensionContext, workspace } from 'vscode';
 import { goGroupImports } from './group';
 import { updateSaveRegistration } from './register';
 
 export function activate(context: ExtensionContext) {
-  let disposable = commands.registerCommand('extension.goGroupImports', goGroupImports);
+  let disposable = commands.registerCommand(
+    'extension.goGroupImports',
+    goGroupImports
+  );
   context.subscriptions.push(disposable);
 
   updateSaveRegistration();
@@ -16,5 +15,3 @@ export function activate(context: ExtensionContext) {
 }
 
 export function deactivate() {}
-
-
