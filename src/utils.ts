@@ -1,9 +1,10 @@
 import * as path from 'path';
 import { window, workspace, RelativePattern } from 'vscode';
 import { resolve } from 'path';
-const { readdir } = require('fs').promises;
+const { readdir, readFile } = require('fs').promises;
 
 export const multilineImportsGroupRegex = /import \(([^)]+)\)/;
+export const moduleRegex = /module (.*?)\n/;
 
 const fileInGOPATH = (gopath: string | undefined) => {
   if (!gopath) {
@@ -12,8 +13,10 @@ const fileInGOPATH = (gopath: string | undefined) => {
 
   const pwd = window.activeTextEditor.document.fileName;
   const relative = path.relative(gopath, pwd);
-  if (!pwd.includes(relative)) {
-    false;
+  const include = pwd.includes(relative);
+
+  if (!include) {
+    return false;
   }
 
   return true;
@@ -41,11 +44,17 @@ export const resolveRootPackage = () => {
     .slice(0, -1)
     .join(path.sep);
 
-  return getRootDir(currentFolder, 5).then(rootDir => {
-    return rootDir
-      .split(path.sep)
-      .slice(-1)
-      .join(path.sep);
+  return getRootDir(currentFolder, 10).then(rootDir => {
+    return readFile(rootDir + "/go.mod");
+  }).then(data => {
+    var name = "";
+
+    const matches = moduleRegex.exec(data);
+    if (matches !== null) {
+      name = matches[1];
+    }
+
+    return name;
   });
 };
 
