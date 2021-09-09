@@ -1,6 +1,5 @@
 import * as path from 'path';
-import { window, workspace, RelativePattern } from 'vscode';
-import { resolve } from 'path';
+import { window } from 'vscode';
 const { readdir, readFile } = require('fs').promises;
 
 export const multilineImportsGroupRegex = /import \(([^)]+)\)/;
@@ -25,10 +24,7 @@ const fileInGOPATH = (gopath: string | undefined) => {
 const resolveRootPackageWithGOPATH = () => {
   const pwd = window.activeTextEditor.document.fileName;
   const trimmedPwd = pwd.replace(path.join(process.env.GOPATH, 'src/', ''), '');
-  const rootPkg = trimmedPwd
-    .split(path.sep)
-    .slice(0, 2)
-    .join(path.sep);
+  const rootPkg = trimmedPwd.split(path.sep).slice(0, 2).join(path.sep);
 
   return rootPkg;
 };
@@ -39,23 +35,22 @@ export const resolveRootPackage = () => {
   }
 
   const pwd = window.activeTextEditor.document.fileName;
-  const currentFolder = pwd
-    .split(path.sep)
-    .slice(0, -1)
-    .join(path.sep);
+  const currentFolder = pwd.split(path.sep).slice(0, -1).join(path.sep);
 
-  return getRootDir(currentFolder, 10).then(rootDir => {
-    return readFile(rootDir + "/go.mod");
-  }).then(data => {
-    var name = "";
+  return getRootDir(currentFolder, 10)
+    .then((rootDir) => {
+      return readFile(rootDir + '/go.mod');
+    })
+    .then((data) => {
+      var name = '';
 
-    const matches = moduleRegex.exec(data);
-    if (matches !== null) {
-      name = matches[1];
-    }
+      const matches = moduleRegex.exec(data);
+      if (matches !== null) {
+        name = matches[1];
+      }
 
-    return name;
-  });
+      return name;
+    });
 };
 
 const getRootDir = async (dir: string, depthLimit: number): Promise<string> => {
@@ -63,17 +58,14 @@ const getRootDir = async (dir: string, depthLimit: number): Promise<string> => {
     name: string;
     isDirectory: () => boolean;
   }[];
-  const goModFile = dirents.find(dirent => dirent.name === 'go.mod');
+  const goModFile = dirents.find((dirent) => dirent.name === 'go.mod');
   if (goModFile) {
     return dir;
   }
 
   const newDir =
     dir.split(path.sep).length > 1 &&
-    dir
-      .split(path.sep)
-      .slice(0, -1)
-      .join(path.sep);
+    dir.split(path.sep).slice(0, -1).join(path.sep);
 
   if (depthLimit > 0 && newDir) {
     return getRootDir(newDir, depthLimit - 1);
@@ -88,7 +80,7 @@ export const getImports = (documentText: string): string[] => {
     return [];
   }
 
-  return importsMatch[1].split('\n').filter(line => line.trim() != '');
+  return importsMatch[1].split('\n').filter((line) => line.trim() != '');
 };
 
 export type ImportsRange = {
