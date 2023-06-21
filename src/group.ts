@@ -23,7 +23,7 @@ export const goGroupImports = async () => {
 
   if (!imports.length) return;
 
-  const groupedList = group(imports, rootPkg);
+  const groupedList = group(imports, rootPkg, getOrganizationPkgSetting());
 
   const importsRange = getImportsRange(documentText);
 
@@ -34,13 +34,21 @@ export const goGroupImports = async () => {
     importsRange.end - 1,
     Number.MAX_VALUE
   );
-  edit.replace(document.uri, range, importGroupsToString(groupedList));
+  const newImports = importGroupsToString(groupedList);
+  edit.replace(document.uri, range, newImports);
   workspace.applyEdit(edit).then(document.save);
 };
+
+
+const getOrganizationPkgSetting = () => {
+  return (workspace.getConfiguration('groupImports').get('organizationPkg') as string);
+}
+
 
 type ImportGroups = {
   stdlib: string[];
   thirdParty: string[];
+  organization: string[];
   own: string[];
 };
 
@@ -48,22 +56,25 @@ const isStdlibImport = (imp: string): boolean => {
   return !imp.includes('.');
 };
 
-const isOwnImport = (imp: string, root: string): boolean => {
+const isImportFrom = (imp: string, root: string): boolean => {
   return imp.includes(root);
 };
 
-export const group = (imports: string[], rootPkg: string): ImportGroups => {
+export const group = (imports: string[], rootPkg, organizationPkg: string): ImportGroups => {
   const importGroups = <ImportGroups>{
     stdlib: [],
     thirdParty: [],
+    organization: [],
     own: [],
   };
 
   imports.forEach((imp) => {
-    if (isOwnImport(imp, rootPkg)) {
+    if (isImportFrom(imp, rootPkg)) {
       importGroups.own.push(imp);
     } else if (isStdlibImport(imp)) {
       importGroups.stdlib.push(imp);
+    } else if (organizationPkg != "" && isImportFrom(imp, organizationPkg)) {
+      importGroups.organization.push(imp);
     } else {
       importGroups.thirdParty.push(imp);
     }
