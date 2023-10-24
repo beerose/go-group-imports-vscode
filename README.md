@@ -10,3 +10,4 @@ VSCode extension for separating imports in Go files into three (or four dependin
 ## Extension Settings
 
 - `groupImports.onSave`: automatically group imports on save. Default value is `true`.
+- `groupImports.includeOrgGroup`: handle imports from the organization into a separate group. Default value is `undefined`.
