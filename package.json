@@ -21,8 +21,7 @@
     "Formatters"
   ],
   "activationEvents": [
-    "onLanguage:go",
-    "onCommand:extension.goGroupImports"
+    "onLanguage:go"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -39,6 +38,11 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically group imports on save."
+        },
+        "groupImports.includeOrgGroup": {
+          "type": "string",
+          "default": "",
+          "description": "Handle imports from the organization into a separate group."
         }
       }
     }

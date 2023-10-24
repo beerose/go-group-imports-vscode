@@ -1,31 +1,38 @@
-import { Disposable, workspace } from 'vscode';
+import { Disposable, workspace } from 'vscode'
 
-import { groupImportsOnSave } from './groupOnSave';
+import { groupImportsOnSave } from './groupOnSave'
 
-let saveRegistration: Disposable;
+let saveRegistration: Disposable
 
 const unregisterWillSaveTextDocument = () => {
   if (!saveRegistration) {
-    return;
+    return
   }
 
-  saveRegistration.dispose();
-  saveRegistration = null;
-};
+  saveRegistration.dispose()
+  saveRegistration = null
+}
 
 const registerWillSaveTextDocument = () => {
   if (saveRegistration) {
-    return;
+    return
   }
 
-  saveRegistration = workspace.onWillSaveTextDocument(groupImportsOnSave);
-};
+  saveRegistration = workspace.onWillSaveTextDocument(groupImportsOnSave)
+}
 
 export const getOnSaveSetting = () => {
-  return workspace.getConfiguration('groupImports').get('onSave');
-};
+  return workspace.getConfiguration('groupImports').get('onSave')
+}
+
+export const getIncludeOrgGroupSettings = () => {
+  return (
+    workspace.getConfiguration('groupImports').get<string>('includeOrgGroup') ||
+    ''
+  )
+}
 
 export const updateSaveRegistration = () =>
   getOnSaveSetting()
     ? registerWillSaveTextDocument()
-    : unregisterWillSaveTextDocument();
+    : unregisterWillSaveTextDocument()
