@@ -1,6 +1,7 @@
 import * as path from 'path';
 import { window } from 'vscode';
 const { readdir, readFile } = require('fs').promises;
+import { exec } from 'child_process';
 
 export const multilineImportsGroupRegex = /import \(([^)]+)\)/;
 export const moduleRegex = /module (.*?)\n/;
@@ -109,4 +110,19 @@ export const getImportsRange = (documentText: string): ImportsRange => {
     end,
     start,
   };
+};
+
+
+export const execCommand = (workspacePath: string, command: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    exec(command, { cwd: workspacePath }, (error, stdout, stderr) => {
+      if (error) {
+        reject(new Error(`Error executing command: ${error.message}`));
+      } else if (stderr) {
+        reject(new Error(`Stderr output: ${stderr}`));
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
 };
