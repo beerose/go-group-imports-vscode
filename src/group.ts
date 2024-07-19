@@ -1,4 +1,4 @@
-import { Range, window, workspace, WorkspaceEdit, Position } from 'vscode'
+import { Range, window, WorkspaceEdit } from 'vscode'
 import { resolveRootPackage, getImportsRange, getImports, execCommand } from './utils'
 import { getIncludeOrgGroupSettings } from './register'
 
@@ -20,8 +20,7 @@ export const goGroupImports = async () => {
   }
   // TODO show error
 
-  const projectRoot = workspace.workspaceFolders[0].uri.path;
-  const output = await execCommand(projectRoot, 'go list -m');
+  const output = await execCommand('go list -m');
   const modules = output.split('\n').filter(line => line.trim() !== '');
 
   const imports = getImports(documentText)
@@ -32,7 +31,7 @@ export const goGroupImports = async () => {
 
   const importsRange = getImportsRange(documentText)
 
-  const edit = new WorkspaceEdit()
+
   const range = new Range(
     importsRange.start,
     0,
@@ -40,8 +39,21 @@ export const goGroupImports = async () => {
     Number.MAX_VALUE
   )
   const newImports = importGroupsToString(groupedList)
-  edit.replace(document.uri, range, newImports)
-  workspace.applyEdit(edit).then(document.save)
+
+  const edit = TextEdit.replace(range, newImports);
+
+  return [edit]
+}
+
+import * as vscode from 'vscode';
+import { TextEdit, Position } from 'vscode';
+
+// Helper function to modify a specific line
+async function modifyLineContent(document: vscode.TextDocument, lineNumber: number, newText: string): Promise<TextEdit[]> {
+  const line = document.lineAt(lineNumber);
+  const range = new Range(new Position(lineNumber, 0), new Position(lineNumber, line.text.length));
+  const edit = TextEdit.replace(range, newText);
+  return [edit];
 }
 
 type ImportGroups = {

@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { window } from 'vscode';
+import { window, workspace } from 'vscode';
 const { readdir, readFile } = require('fs').promises;
 import { exec } from 'child_process';
 
@@ -30,8 +30,36 @@ const resolveRootPackageWithGOPATH = () => {
   return rootPkg;
 };
 
-export const resolveRootPackage = () => {
-  if (fileInGOPATH(process.env.GOPATH)) {
+interface GoEnvVars {
+  [key: string]: string;
+}
+
+const getGoEnvs = async (): Promise<GoEnvVars> => {
+  const output = await execCommand('go env');
+
+  const lines = output.trim().split('\n');
+  const envVars: GoEnvVars = {};
+
+  lines.forEach(line => {
+    const parts = line.split('=');
+    if (parts.length === 2) {
+      const key = parts[0];
+      const value = parts[1];
+      envVars[key] = value;
+    }
+  });
+
+  return envVars;
+}
+
+export const resolveRootPackage = async (): Promise<string> => {
+  const goEnvs = await getGoEnvs();
+
+  if (goEnvs.GO111MODULE == 'on') {
+    return resolveRootPackageByGoModFile(goEnvs.GOMOD);
+  }
+
+  if (fileInGOPATH(goEnvs.GOPATH)) {
     return resolveRootPackageWithGOPATH();
   }
 
@@ -40,19 +68,22 @@ export const resolveRootPackage = () => {
 
   return getRootDir(currentFolder, 10)
     .then((rootDir) => {
-      return readFile(rootDir + '/go.mod');
-    })
-    .then((data) => {
-      var name = '';
-
-      const matches = moduleRegex.exec(data);
-      if (matches !== null) {
-        name = matches[1];
-      }
-
-      return name;
+      return resolveRootPackageByGoModFile(rootDir + '/go.mod');
     });
 };
+
+
+const resolveRootPackageByGoModFile = async (filePath: string): Promise<string> => {
+  const content = await readFile(filePath)
+  var name = '';
+
+  const matches = moduleRegex.exec(content);
+  if (matches !== null) {
+    name = matches[1];
+  }
+
+  return name;
+}
 
 const getRootDir = async (dir: string, depthLimit: number): Promise<string> => {
   const dirents = (await readdir(dir, { withFileTypes: true })) as {
@@ -113,9 +144,10 @@ export const getImportsRange = (documentText: string): ImportsRange => {
 };
 
 
-export const execCommand = (workspacePath: string, command: string): Promise<string> => {
+const projectRoot = workspace.workspaceFolders[0].uri.path;
+export const execCommand = (command: string, cwd: string = projectRoot): Promise<string> => {
   return new Promise((resolve, reject) => {
-    exec(command, { cwd: workspacePath }, (error, stdout, stderr) => {
+    exec(command, { cwd: cwd }, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(`Error executing command: ${error.message}`));
       } else if (stderr) {
