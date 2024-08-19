@@ -1,6 +1,5 @@
-import { Disposable, workspace } from 'vscode'
-
-import { groupImportsOnSave } from './groupOnSave'
+import { Disposable, workspace, TextDocumentWillSaveEvent } from 'vscode'
+import { goGroupImports } from './group';
 
 let saveRegistration: Disposable
 
@@ -18,7 +17,13 @@ const registerWillSaveTextDocument = () => {
     return
   }
 
-  saveRegistration = workspace.onWillSaveTextDocument(groupImportsOnSave)
+  saveRegistration = workspace.onWillSaveTextDocument(async (e: TextDocumentWillSaveEvent) => {
+    const document = e.document;
+    if (document.languageId === 'go') {
+      const edits = goGroupImports()
+      e.waitUntil(edits);
+    }
+  })
 }
 
 export const getOnSaveSetting = () => {
